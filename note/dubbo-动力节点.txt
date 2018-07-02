@@ -1,0 +1,58 @@
+重点：同一个JVM下，一个方法可以直接调用另一个方法；不同的JVM下，一个项目的方法通过RPC调用另一个项目的方法；
+创建 2个maven项目 dubbo-provider，dubbo-consumer，已经是分布式开发了；
+创建第 1个dubbo程序，暂时不使用注册中心registry，先创建 dubbo的maven项目，再创建dubbo-provider项目：
+dubbo的pom.xml文件导入 dubbo包：
+<dependency>
+<groupId>com.alibaba</groupId>
+<artifactId>dubbo</artifactId>
+<version>${dubbo.version}</version>
+<exclusions>
+  <exclusion>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring</artifactId>
+  </exclusion>
+</exclusions>
+</dependency>
+1、dubbo-provider就是向外提供方法，供dubbo-consumer调用，因此 provider中创建接口方法，向某人打招呼：
+package com.bjpowernode.dubbo;
+public interface HelloService {
+    public abstract String sayHello(String name);
+}
+再创建其实现类 HelloServiceImpl
+package com.bjpowernode.dubbo.impl;
+public class HelloServiceImpl implements HelloService {
+    @Override
+    public String sayHello(String name) {
+        return "Hello," + name;
+    }
+}
+2、此时这个接口方法并不能被外部所使用，需要依赖dubbo将其发布出去，此处，只需要配置spring相关配置文件即可，
+dubbo是一个spring的自定义标签，与spring无缝融合，定义sping总配置文件applicationContext.xml里面通过
+<import resource=”classpath: applicationContext-dubbo-provider.xml”/>导入另一个spring配置文件
+applicationContext.xml内容如下：
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns=..." />
+    <import resource="applicationContext-dubbo-provider.xml" />
+	<context:component-scan base-package="com.bjpowernode.dubbo.service" />
+</beans>
+applicationContext-dubbo-provider.xml内容如下：
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="..." />
+    <dubbo:application name="dubbo-provider" />     用于区分各工程
+    <bean id="helloService" class="com.bjpowernode.dubbo.service.impl.HelloServiceImpl"/>
+	<dubbo:service interface="com.bjpowernode.dubbo.service.HelloService" ref="helloService" registry="N/A"/>
+</beans>
+3、通过main方法加载applicationContext.xml，再加载applicationContext-dubbo-provider.xml启动
+dubbo，也可以通过Tomcat的监听器去加载applicationContext.xml实现启动；
+创建 com.bjpowernode.bootstrap.Bootstrap类，启动spring容器；
+public class Bootstrap {
+    public static void main(String[] args) throws IOException {
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+        /*运行spring容器*/
+        context.start();
+        /*一直处于读的状态，避免程序一运行就结束了，运行结束了，消费者将无法调用*/
+        System.in.read();
+    }
+}
+
+git@github.com:gouyan123/dubbo.git

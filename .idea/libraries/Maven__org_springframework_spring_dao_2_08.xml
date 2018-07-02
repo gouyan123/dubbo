@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.springframework:spring-dao:2.08">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/spring-dao/2.08/spring-dao-2.08.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/spring-dao/2.08/spring-dao-2.08-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/spring-dao/2.08/spring-dao-2.08-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
