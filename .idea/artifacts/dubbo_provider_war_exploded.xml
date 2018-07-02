@@ -1,12 +1,15 @@
 <component name="ArtifactManager">
-  <artifact type="exploded-war" name="dubboprovider:war exploded">
-    <output-path>$PROJECT_DIR$/dubboprovider/target/dubbo-provider</output-path>
+  <artifact type="exploded-war" name="dubbo-provider:war exploded">
+    <output-path>$PROJECT_DIR$/dubbo-provider/target/dubbo-provider</output-path>
     <root id="root">
       <element id="directory" name="WEB-INF">
         <element id="directory" name="classes">
           <element id="module-output" name="dubbo-provider" />
         </element>
         <element id="directory" name="lib">
+          <element id="archive" name="dubbo-api-1.0-SNAPSHOT.jar">
+            <element id="module-output" name="dubbo-api" />
+          </element>
           <element id="library" level="project" name="Maven: com.alibaba:dubbo:2.6.2" />
           <element id="library" level="project" name="Maven: org.javassist:javassist:3.20.0-GA" />
           <element id="library" level="project" name="Maven: org.jboss.netty:netty:3.2.5.Final" />
