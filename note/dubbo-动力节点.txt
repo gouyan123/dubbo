@@ -69,15 +69,69 @@ public class Bootstrap {
 	<!--工程名-->
 	<dubbo:application name="dubbo-consumer"/>
 	<!--引用远程服务-->
+	<!--此处没有使用注册中心，使用的是dubbo协议-->
 	<dubbo:reference id="helloService" interface="com.bjpowernode.dubbo.service.HelloService" url="dubbo://localhost:20880"/>
 </beans>
 创建 com.bjpowernode.bootstrap.Bootstrap类，启动spring容器
 public class Bootstrap {
     public static void main(String[] args) throws IOException {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
-        /*运行spring容器*/
-        context.start();
-        /*一直处于读的状态，避免程序一运行就结束了，运行结束了，消费者将无法调用*/
-        System.in.read();
+        /**获取远程provider的 helloService对象*/
+        HelloService helloService = (HelloService) context.getBean("helloService");
+        /**通过动态代理，将对象，方法名称，参数发送到provider端执行，然后将返回值传递回来*/
+        String result = helloService.sayHello("小唐");
+        System.out.println(result);
     }
 }
+---------------------------使用multicast注册中心--------------------------------------------
+修改 applicationContext-dubbo-provider.xml文件：将服务注册到注册中心上；
+将<dubbo:service interface="..." ref="..." registry="N/A"/>中的 registry="N/A"注释掉，并添加
+注册中心，将方法注册到 registry上，代码如下：
+<dubbo:registry address="multicast://224.2.3.4:1234"/>注册中心地址必填；
+
+修改 applicationContext-dubbo-consumer.xml文件：从注册中找到服务；
+添加 <dubbo:registry address="multicast://224.2.3.4:1234"/>注册中心；
+
+运行provider端和consumer端的 main()方法；
+---------------------------使用zookeeper注册中心--------------------------------------------
+pom.xml文件导入 zookeeper相关开发包
+<!--zookeeper开始-->
+<dependency>
+<groupId>org.apache.zookeeper</groupId>
+<artifactId>zookeeper</artifactId>
+<version>${zookeeper.version}</version>
+<type>pom</type>
+</dependency>
+<dependency>
+<groupId>com.101tec</groupId>
+<artifactId>zkclient</artifactId>
+<version>${zkclient.version}</version>
+</dependency>
+<!--zookeeper结束-->
+
+修改 applicationContext-dubbo-provider.xml文件：
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="...">
+    <!--服务名称-->
+	<dubbo:application name="HelloProvider" />
+	<!--provider将服务注册到zookeeper中，指定客户端连接服务端对象为zkclient-->
+	<dubbo:registry address="zookeeper://47.100.49.95:2181" client="zkclient"/>
+
+	<bean id="helloService" class="com.bjpowernode.dubbo.service.impl.HelloServiceImpl"/>
+	<!--将服务注册到zookeepr的 dubbo/com.bjpowernode.dubbo.service.HelloService/providers
+	目录下-->
+	<dubbo:service interface="com.bjpowernode.dubbo.service.HelloService" ref="helloService"/>
+</beans>
+
+修改 applicationContext-dubbo-consumer.xml文件：
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="...">
+	<!--工程名-->
+	<dubbo:application name="dubbo-consumer"/>
+	<!--去zookeeper注册中心取服务，client="zkclient"必须有-->
+    <dubbo:registry address="zookeeper://47.100.49.95:2181"  client="zkclient"/>
+	<!--引用远程服务的 helloService对象-->
+	<!---->
+	<dubbo:reference id="helloService" interface="com.bjpowernode.dubbo.service.HelloService"/>
+</beans>
+

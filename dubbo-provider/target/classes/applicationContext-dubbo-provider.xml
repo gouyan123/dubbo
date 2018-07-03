@@ -8,6 +8,8 @@
 	http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
 	<dubbo:application name="HelloProvider" />
+	<!--<dubbo:registry address="multicast://224.2.3.4:1234"/>-->
+	<dubbo:registry address="zookeeper://47.100.49.95:2181" client="zkclient"/>
 	<bean id="helloService" class="com.bjpowernode.dubbo.service.impl.HelloServiceImpl"/>
-	<dubbo:service interface="com.bjpowernode.dubbo.service.HelloService" ref="helloService" registry="N/A"/>
+	<dubbo:service interface="com.bjpowernode.dubbo.service.HelloService" ref="helloService"/>
 </beans>
